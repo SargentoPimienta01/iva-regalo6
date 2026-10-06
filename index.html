@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>¡Feliz Día, Ivana! • Día 6: El Regalo de la Familia ‍👩‍👧👦</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        * { touch-action: manipulation; }
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-sans-custom { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-serif-custom { font-family: 'Playfair Display', serif; }
+        
+        .arcade-container {
+            position: relative;
+            background: #7c2d12;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(251, 146, 60, 0.2);
+        }
+        .arcade-container::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(124, 45, 18, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        .btn-touch {
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn-touch:active {
+            transform: scale(0.95);
+            filter: brightness(1.25);
+        }
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: floatAnim 3s ease-in-out infinite; }
+        .glow-text { text-shadow: 0 0 15px rgba(251, 146, 60, 0.6); }
+        
+        .hole {
+            aspect-ratio: 1;
+            background: linear-gradient(180deg, #431407 0%, #7c2d12 100%);
+            border: 3px solid #ea580c;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.6);
+        }
+        .hole::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .mole {
+            position: absolute;
+            bottom: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(2rem, 10vw, 3.5rem);
+            transition: bottom 0.15s ease-out;
+            cursor: pointer;
+            z-index: 3;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.8));
+        }
+        .mole.up {
+            bottom: 10%;
+        }
+        .mole.caught {
+            animation: caught 0.3s ease-out;
+        }
+        @keyframes caught {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.3); filter: drop-shadow(0 0 25px rgba(251, 191, 36, 1)); }
+            100% { transform: translateX(-50%) scale(0); opacity: 0; }
+        }
+        .mole.wrong {
+            animation: wrong 0.4s ease-out;
+        }
+        @keyframes wrong {
+            0%, 100% { transform: translateX(-50%); }
+            25% { transform: translateX(calc(-50% - 10px)); }
+            75% { transform: translateX(calc(-50% + 10px)); }
+        }
+        
+        .timer-warning {
+            animation: blink 0.5s infinite;
+            color: #ef4444 !important;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .overlay-content {
+            position: relative;
+            z-index: 30;
+        }
+
+        .heart-pop {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            animation: heartFloat 1s ease-out forwards;
+            z-index: 50;
+        }
+        @keyframes heartFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-orange-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans-custom select-none overflow-x-hidden p-2 sm:p-4">
+
+    <header class="max-w-md sm:max-w-xl mx-auto w-full text-center my-1 sm:my-2">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/40 text-orange-300 text-[10px] sm:text-xs font-pixel mb-1.5">
+            <i class="fa-solid fa-gift text-orange-400"></i>
+            ¡PARA IVANA! • DÍA 6 DE 12
+        </div>
+        <h1 class="font-pixel text-xs sm:text-sm md:text-base text-orange-400 tracking-wider leading-relaxed glow-text">
+            ABRAZA A TU FAMILIA 👨‍👩‍👧‍👦💕
+        </h1>
+        <p class="text-[11px] sm:text-xs text-orange-400/70 mt-1 max-w-sm mx-auto leading-normal">
+            Día 6 de tu cuenta regresiva. Hoy celebramos el regalo más grande: la familia.
+        </p>
+    </header>
+
+    <main class="max-w-md sm:max-w-xl mx-auto w-full flex-grow flex flex-col items-center justify-center relative">
+        
+        <div id="game-frame" class="w-full arcade-container rounded-2xl border-2 sm:border-4 border-orange-600/80 p-2 sm:p-4 relative overflow-hidden flex flex-col items-center">
+            
+            <div id="hud" class="w-full flex justify-between items-center bg-orange-900/90 border border-orange-700 px-3 py-2 rounded-xl mb-2 font-pixel text-[10px] sm:text-xs text-orange-300">
+                <div class="flex items-center gap-1">
+                    <span class="text-orange-400/70">ABRAZOS:</span>
+                    <span id="score-display" class="text-orange-400 font-bold">0</span>
+                    <span class="text-orange-500/70">/20</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-orange-400/70">⏱️</span>
+                    <span id="timer-display" class="text-orange-400 font-bold">45</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-orange-400/70">❤️</span>
+                    <span id="lives-display" class="text-orange-400 font-bold">3</span>
+                </div>
+            </div>
+
+            <div class="relative w-full rounded-xl overflow-hidden bg-gradient-to-b from-orange-800 via-orange-900 to-red-950 border border-orange-500/30 shadow-inner p-3">
+                <div id="game-board" class="grid grid-cols-3 gap-3 sm:gap-4">
+                    <!-- 9 holes generated by JS -->
+                </div>
+
+                <!-- Overlay Inicio -->
+                <div id="start-overlay" class="absolute inset-0 bg-orange-950/95 flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20">
+                    <div class="overlay-content">
+                        <div class="text-4xl sm:text-5xl mb-2 animate-float">👨‍👩‍‍👦</div>
+                        <h2 class="font-pixel text-xs sm:text-sm text-orange-400 mb-3 leading-relaxed">¡ABRAZA A TU FAMILIA!</h2>
+                        <p class="text-xs text-orange-100 mb-3 max-w-xs leading-relaxed">
+                            Hola Ivana. Los miembros de tu familia aparecerán en las ventanas. <b>Tócalos rápido para abrazarlos</b> 💕
+                        </p>
+                        <p class="text-xs text-red-300 mb-4 max-w-xs leading-relaxed">
+                            ⚠️ ¡Cuidado con las <b>distracciones</b> (📱📺💼)! Si las tocas, pierdes una vida.
+                        </p>
+                        <button onclick="startGame()" class="btn-touch font-pixel text-[10px] sm:text-xs bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white px-5 py-3 rounded-xl border-b-4 border-orange-800 font-bold active:translate-y-1 shadow-lg transition-all flex items-center gap-2 mx-auto">
+                            <i class="fa-solid fa-play"></i> ¡INICIAR JUEGO!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Overlay Game Over -->
+                <div id="gameover-overlay" class="hidden absolute inset-0 bg-orange-950/95 flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20">
+                    <div class="overlay-content">
+                        <div class="text-4xl sm:text-5xl mb-2 text-orange-400/50">💔</div>
+                        <h2 class="font-pixel text-xs sm:text-sm text-orange-300 mb-2">¡SE ACABÓ!</h2>
+                        <p class="text-xs text-orange-200/70 mb-5 max-w-xs">
+                            Diste <b id="final-score">0</b> abrazos. La familia siempre estará ahí esperándote. ¡Inténtalo de nuevo!
+                        </p>
+                        <button onclick="startGame()" class="btn-touch font-pixel text-[10px] sm:text-xs bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-5 py-3 rounded-xl border-b-4 border-orange-900 font-bold active:translate-y-1 shadow-lg transition-all flex items-center gap-2 mx-auto">
+                            <i class="fa-solid fa-rotate-right"></i> INTENTAR DE NUEVO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Overlay Victoria -->
+                <div id="victory-overlay" class="hidden absolute inset-0 bg-orange-950/95 flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20">
+                    <div class="overlay-content">
+                        <div class="text-4xl sm:text-5xl mb-2 animate-float">🏠</div>
+                        <h2 class="font-pixel text-xs sm:text-sm text-orange-400 mb-3">¡FAMILIA UNIDA!</h2>
+                        <p class="text-xs text-orange-200 mb-5 max-w-xs">
+                            ¡Diste <b>20 abrazos</b> con <b id="remaining-time">0</b> segundos de sobra! El amor de familia es el tesoro más grande.
+                        </p>
+                        <button onclick="showVictoryCard()" class="btn-touch font-pixel text-[10px] sm:text-xs bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white px-5 py-3 rounded-xl border-b-4 border-orange-800 font-bold active:translate-y-1 shadow-lg transition-all flex items-center gap-2 mx-auto">
+                            <i class="fa-solid fa-gift"></i> VER MI REGALO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Victoria -->
+        <div id="victory-card" class="hidden w-full bg-gradient-to-b from-orange-900 via-orange-900 to-red-950/70 rounded-3xl p-5 sm:p-7 border-2 border-orange-400/80 shadow-2xl relative overflow-hidden transition-all duration-700">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center mb-4 sm:mb-6">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full text-[10px] font-pixel mb-2 border border-orange-500/40">
+                    <i class="fa-solid fa-crown text-orange-400"></i> ¡REGALO 6 DESBLOQUEADO!
+                </div>
+                <h2 class="font-serif-custom text-2xl sm:text-3xl font-bold text-orange-200">
+                    ¡La familia es todo, Ivana! 🎉
+                </h2>
+                <span class="block text-orange-400 text-xs font-semibold mt-1">Día 6: El Regalo de la Familia</span>
+                <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-orange-300 mx-auto mt-2 rounded-full"></div>
+            </div>
+
+            <div class="bg-orange-950/85 rounded-2xl p-4 sm:p-6 border border-orange-500/30 text-orange-100 space-y-3.5 text-xs sm:text-sm leading-relaxed font-sans-custom relative">
+                
+                <p class="font-serif-custom italic text-sm sm:text-base text-orange-300 border-l-2 border-orange-400 pl-3">
+                    "La familia no es algo importante. Es todo. Y a veces el mejor regalo no es lo que das, sino el tiempo y el corazón que compartes."
+                </p>
+
+                <p>
+                    <b>Querida Ivana:</b> Hoy te reto a salir de tu zona de confort. A veces damos por sentado a quienes viven con nosotros, pero un pequeño gesto puede cambiar el día de alguien.
+                </p>
+
+                <div class="bg-orange-950/60 border-l-4 border-orange-400 p-3 rounded-r-xl text-orange-200 my-2 italic text-xs sm:text-sm">
+                    <p class="font-serif-custom text-sm">
+                        "¡Mirad cuán bueno y cuán delicioso es<br>habitar los hermanos juntos en armonía!"
+                    </p>
+                    <span class="block font-bold text-right text-[10px] sm:text-xs text-orange-400 font-sans-custom not-italic mt-1">— Salmos 133:1</span>
+                </div>
+
+                <p>
+                    Hoy no te pido que compres nada. Te pido algo mucho más valioso: <b>tu presencia, tu atención y tu corazón</b>.
+                </p>
+
+                <div class="bg-gradient-to-r from-orange-950 to-red-900 rounded-xl p-3.5 border border-orange-400/50 flex items-start gap-3 text-orange-200 mt-2">
+                    <div class="text-2xl sm:text-3xl text-orange-400 shrink-0">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold block text-[10px] sm:text-xs uppercase tracking-wider text-orange-400 font-pixel mb-1">Tu reto especial de hoy:</span>
+                        <span class="text-orange-100 text-xs block mb-2"><b>Hoy harás un acto de cariño espontáneo con cada persona que viva en tu casa.</b> Sal de tu zona de confort y conecta de verdad:</span>
+                        <ul class="text-orange-100 text-xs space-y-1 list-disc list-inside">
+                            <li>Un abrazo largo y sincero (de esos que duran)</li>
+                            <li>Escribir una nota a mano y dejarla en su lugar</li>
+                            <li>Preparar algo rico sin que te lo pidan</li>
+                            <li>Decir "te quiero" mirando a los ojos</li>
+                            <li>Preguntar "¿cómo estás?" y escuchar de verdad</li>
+                        </ul>
+                        <span class="text-orange-300 text-xs block mt-2 italic">Elige uno diferente para cada persona. ¡Verás cómo cambia el ambiente en casa! 💕</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5 mt-5">
+                <button onclick="copyLetter()" class="flex-1 py-3 px-4 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl text-[10px] sm:text-xs font-pixel transition-all flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-regular fa-copy"></i> COPIAR MENSAJE
+                </button>
+                <button onclick="resetGameView()" class="py-3 px-4 bg-orange-800 hover:bg-orange-700 text-orange-300 font-semibold rounded-xl text-[10px] sm:text-xs font-pixel transition-all border border-orange-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gamepad"></i> JUGAR DE NUEVO
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-orange-400 text-orange-950 px-4 py-2 rounded-full font-pixel text-[10px] font-bold shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2 max-w-[90%] text-center">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text">¡Mensaje copiado!</span>
+    </div>
+
+    <script>
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playHug() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(783.99, this.ctx.currentTime + 0.16);
+                osc.frequency.setValueAtTime(1046.50, this.ctx.currentTime + 0.24);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
+            },
+            playWrong() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            },
+            playWin() {
+                if (!this.ctx) return;
+                [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.12 + 0.3);
+                    osc.start(this.ctx.currentTime + idx * 0.12);
+                    osc.stop(this.ctx.currentTime + idx * 0.12 + 0.3);
+                });
+            }
+        };
+
+        // Miembros de familia (buenos) y distracciones (malas)
+        const familyMembers = ['👨', '👩', '👧', '👦', '👴', '👵'];
+        const distractions = ['📱', '📺', '💼'];
+
+        const WIN_SCORE = 20;
+        const TIME_LIMIT = 60;
+        const START_LIVES = 3;
+
+        let score = 0;
+        let lives = START_LIVES;
+        let timeLeft = TIME_LIMIT;
+        let timerInterval = null;
+        let gameActive = false;
+        let activeMoles = new Set();
+        let spawnTimeout = null;
+
+        function createBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'hole';
+                hole.dataset.index = i;
+                
+                const mole = document.createElement('div');
+                mole.className = 'mole';
+                mole.dataset.index = i;
+                mole.addEventListener('click', (e) => handleMoleClick(e, mole));
+                
+                hole.appendChild(mole);
+                board.appendChild(hole);
+            }
+        }
+
+        function spawnMole() {
+            if (!gameActive) return;
+
+            // Elegir un hueco aleatorio que esté libre
+            const availableHoles = [];
+            for (let i = 0; i < 9; i++) {
+                if (!activeMoles.has(i)) availableHoles.push(i);
+            }
+            
+            if (availableHoles.length === 0) {
+                scheduleNextSpawn();
+                return;
+            }
+
+            const holeIndex = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+            const mole = document.querySelector(`.mole[data-index="${holeIndex}"]`);
+            
+            // 70% familia, 30% distracción (aumenta con el tiempo)
+            const distractionChance = 0.3 + (score / WIN_SCORE) * 0.2;
+            const isDistraction = Math.random() < distractionChance;
+            
+            if (isDistraction) {
+                mole.textContent = distractions[Math.floor(Math.random() * distractions.length)];
+                mole.dataset.type = 'distraction';
+            } else {
+                mole.textContent = familyMembers[Math.floor(Math.random() * familyMembers.length)];
+                mole.dataset.type = 'family';
+            }
+
+            activeMoles.add(holeIndex);
+            mole.classList.add('up');
+            mole.classList.remove('caught', 'wrong');
+
+            // Tiempo visible: más rápido conforme avanza
+            const visibleTime = Math.max(600, 1200 - (score * 30));
+            
+            setTimeout(() => {
+                if (activeMoles.has(holeIndex) && mole.classList.contains('up')) {
+                    hideMole(mole, holeIndex);
+                }
+            }, visibleTime);
+
+            scheduleNextSpawn();
+        }
+
+        function hideMole(mole, holeIndex) {
+            mole.classList.remove('up');
+            activeMoles.delete(holeIndex);
+        }
+
+        function scheduleNextSpawn() {
+            if (!gameActive) return;
+            const nextSpawn = Math.max(400, 900 - (score * 25));
+            spawnTimeout = setTimeout(spawnMole, nextSpawn);
+        }
+
+        function handleMoleClick(e, mole) {
+            if (!gameActive) return;
+            if (!mole.classList.contains('up')) return;
+            if (mole.classList.contains('caught') || mole.classList.contains('wrong')) return;
+
+            const holeIndex = parseInt(mole.dataset.index);
+
+            if (mole.dataset.type === 'family') {
+                // ¡Abrazo correcto!
+                mole.classList.add('caught');
+                AudioFX.playHug();
+                score++;
+                document.getElementById('score-display').innerText = score;
+                createHeartPop(e.clientX, e.clientY);
+                
+                setTimeout(() => {
+                    hideMole(mole, holeIndex);
+                }, 300);
+
+                if (score >= WIN_SCORE) {
+                    triggerWin();
+                }
+            } else {
+                // ¡Distracción! Pierde vida
+                mole.classList.add('wrong');
+                AudioFX.playWrong();
+                lives--;
+                document.getElementById('lives-display').innerText = lives;
+                
+                // Shake del HUD
+                document.getElementById('lives-display').classList.add('timer-warning');
+                setTimeout(() => {
+                    document.getElementById('lives-display').classList.remove('timer-warning');
+                }, 1000);
+
+                setTimeout(() => {
+                    hideMole(mole, holeIndex);
+                }, 400);
+
+                if (lives <= 0) {
+                    triggerGameOver();
+                }
+            }
+        }
+
+        function createHeartPop(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart-pop';
+            heart.textContent = '💕';
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    document.getElementById('timer-display').classList.add('timer-warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    triggerGameOver();
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            AudioFX.init();
+            document.getElementById('start-overlay').classList.add('hidden');
+            document.getElementById('gameover-overlay').classList.add('hidden');
+            document.getElementById('victory-overlay').classList.add('hidden');
+            
+            score = 0;
+            lives = START_LIVES;
+            timeLeft = TIME_LIMIT;
+            gameActive = true;
+            activeMoles.clear();
+            
+            document.getElementById('score-display').innerText = '0';
+            document.getElementById('timer-display').innerText = timeLeft;
+            document.getElementById('lives-display').innerText = lives;
+            document.getElementById('timer-display').classList.remove('timer-warning');
+            document.getElementById('lives-display').classList.remove('timer-warning');
+            
+            if (timerInterval) clearInterval(timerInterval);
+            if (spawnTimeout) clearTimeout(spawnTimeout);
+            
+            // Reset all moles
+            document.querySelectorAll('.mole').forEach(m => {
+                m.classList.remove('up', 'caught', 'wrong');
+            });
+            
+            startTimer();
+            scheduleNextSpawn();
+        }
+
+        function triggerGameOver() {
+            gameActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+            if (spawnTimeout) clearTimeout(spawnTimeout);
+            AudioFX.playWrong();
+            document.getElementById('final-score').innerText = score;
+            
+            setTimeout(() => {
+                document.getElementById('gameover-overlay').classList.remove('hidden');
+            }, 500);
+        }
+
+        function triggerWin() {
+            gameActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+            if (spawnTimeout) clearTimeout(spawnTimeout);
+            AudioFX.playWin();
+            
+            document.getElementById('remaining-time').innerText = timeLeft;
+            
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#fb923c', '#fdba74', '#fbbf24', '#ffffff', '#f472b6']
+            });
+            
+            setTimeout(() => {
+                document.getElementById('victory-overlay').classList.remove('hidden');
+            }, 500);
+        }
+
+        function showVictoryCard() {
+            document.getElementById('game-frame').classList.add('hidden');
+            document.getElementById('victory-card').classList.remove('hidden');
+        }
+
+        function resetGameView() {
+            document.getElementById('victory-card').classList.add('hidden');
+            document.getElementById('game-frame').classList.remove('hidden');
+            document.getElementById('start-overlay').classList.remove('hidden');
+        }
+
+        function copyLetter() {
+            const letterText = `🎁 Día 6: El Regalo de la Familia (Para Ivana)\n\n"¡Mirad cuán bueno y cuán delicioso es habitar los hermanos juntos en armonía!" — Salmos 133:1\n\n¡Querida Ivana! Hoy te reto a salir de tu zona de confort: haz un acto de cariño espontáneo con cada persona que viva en tu casa. Un abrazo largo, una nota, algo rico preparado con amor, o simplemente decir "te quiero" mirando a los ojos. ¡El amor de familia es el tesoro más grande! 👨‍👩‍👧‍👦💕`;
+            
+            navigator.clipboard.writeText(letterText).then(() => {
+                showToast("¡Mensaje copiado para Ivana!");
+            }).catch(() => {
+                const temp = document.createElement("textarea");
+                temp.value = letterText; 
+                document.body.appendChild(temp); 
+                temp.select();
+                document.execCommand("copy"); 
+                document.body.removeChild(temp);
+                showToast("¡Mensaje copiado para Ivana!");
+            });
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.remove('opacity-0'); 
+            toast.classList.add('opacity-100');
+            setTimeout(() => { 
+                toast.classList.remove('opacity-100'); 
+                toast.classList.add('opacity-0'); 
+            }, 3000);
+        }
+
+        // Crear el tablero al cargar
+        createBoard();
+    </script>
+</body>
+</html>
